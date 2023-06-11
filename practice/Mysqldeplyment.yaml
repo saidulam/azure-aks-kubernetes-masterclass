@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: Mydbdeployment
+spec:
+  replicas: 4
+  strategy: Recreate
+  selector:
+    matachLabels:
+       app: mysql
+       tier: dblayer
+  template:
+     metadata:
+         app: mysql
+         tier: dblayer
+     spec:
+       conatiners:
+        - name: sql
+          image: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: dbpassword11
+          ports:
+           - containerPort: 3306
+          volumeMounts: 
+           - name: mysql_persistent_storage
+             mountPath: var/lib/mysql
+           - name: usermanagement-dbcreation-script
+             mountPath: /docker-entrypoint-initdb.d      
+      volumes: 
+         - name: mysql_persistent_storage
+           persistentVolumeClaim: 
+                claimName: azure-managed-disc-pvc
+         - name: usermanagement-dbcreation-script
+           configMap: 
+              name: usermanagement-dbcreation-script                
